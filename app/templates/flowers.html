@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Цветочный магазин</title>
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #4CAF50;
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+        }
+
+        .flower-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            justify-items: center;
+        }
+
+        .flower-card {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 20px;
+            width: 250px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .flower-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .flower-card img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+        }
+
+        .flower-card h3 {
+            font-size: 1.4rem;
+            margin-top: 10px;
+            color: #333;
+        }
+
+        .flower-card p {
+            color: #777;
+            font-size: 1.2rem;
+            margin: 10px 0;
+        }
+
+        .flower-card button {
+            padding: 10px 20px;
+            font-size: 1rem;
+            color: white;
+            background-color: #4CAF50;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .flower-card button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .flower-container {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+    </style>
+<script>
+    async function addToCart(flowerId) {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+            alert("❌ Вы не авторизованы!");
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("flower_id", flowerId);
+
+        const response = await fetch("/cart/items", {
+            method: "POST",
+            headers: { "Authorization": `Bearer ${token}` },
+            body: formData
+        });
+
+        if (response.ok) {
+            alert("✅ Цветок успешно добавлен в корзину!");
+            location.reload();
+        } else {
+            const error = await response.json();
+            alert(`❌ Ошибка: ${error.detail}`);
+        }
+    }
+</script>
+
+</head>
+
+<body>
+
+    <h1>🌸 Каталог цветов</h1>
+
+    <div class="flower-container">
+        {% for flower in flowers %}
+        <div class="flower-card">
+            <img src="{{ url_for('static', path='flowers/' + flower.image_url) }}" alt="{{ flower.name }}">
+            <h3>{{ flower.name }}</h3>
+            <p>Цена: {{ flower.price }} руб.</p>
+            <button onclick="addToCart({{ flower.id }})">🛒 Добавить в корзину</button>
+        </div>
+        {% endfor %}
+    </div>
+
+</body>
+
+</html>
